@@ -131,7 +131,8 @@ fun ItemDetailsScreen(
                     top = innerPadding.calculateTopPadding(),
                     end = innerPadding.calculateEndPadding(LocalLayoutDirection.current),
                 )
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(rememberScrollState()),
+            viewModel = viewModel
         )
     }
 }
@@ -142,7 +143,8 @@ private fun ItemDetailsBody(
     onShare: () -> Unit,
     onSellItem: () -> Unit,
     onDelete: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: ItemDetailsViewModel
 ) {
     Column(
         modifier = modifier.padding(dimensionResource(id = R.dimen.padding_medium)),
@@ -150,12 +152,15 @@ private fun ItemDetailsBody(
     ) {
         var deleteConfirmationRequired by rememberSaveable { mutableStateOf(false) }
         ItemDetails(
-            item = itemDetailsUiState.itemDetails.toItem(), modifier = Modifier.fillMaxWidth()
+            item = itemDetailsUiState.itemDetails.toItem(),
+            modifier = Modifier.fillMaxWidth(),
+            viewModel = viewModel
         )
         Button(
             onClick = onShare,
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.small,
+            enabled = !viewModel.isNoShare()
         ) {
             Text(stringResource(R.string.share))
         }
@@ -190,7 +195,9 @@ private fun ItemDetailsBody(
 
 @Composable
 fun ItemDetails(
-    item: Item, modifier: Modifier = Modifier
+    item: Item,
+    modifier: Modifier = Modifier,
+    viewModel: ItemDetailsViewModel
 ) {
     Card(
         modifier = modifier, colors = CardDefaults.cardColors(
@@ -237,7 +244,7 @@ fun ItemDetails(
 
             ItemDetailsRow(
                 labelResID = R.string.personName,
-                itemDetail = item.personName,
+                itemDetail = if (viewModel.isNoData()) "***" else item.personName,
                 modifier = Modifier.padding(
                     horizontal = dimensionResource(
                         id = R.dimen
@@ -301,12 +308,4 @@ private fun DeleteConfirmationDialog(
         })
 }
 
-@Preview(showBackground = true)
-@Composable
-fun ItemDetailsScreenPreview() {
-    InventoryTheme {
-        ItemDetailsBody(ItemDetailsUiState(
-            outOfStock = true, itemDetails = ItemDetails(1, "Pen", "$100", "10", "Petrov", "petrov@mail.ru","+79555804433")
-        ), onShare = {}, onSellItem = {}, onDelete = {})
-    }
-}
+

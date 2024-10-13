@@ -23,6 +23,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.inventory.data.ItemsRepository
+import com.example.inventory.data.SettingsRepo
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
@@ -37,7 +38,7 @@ class ItemDetailsViewModel(
     savedStateHandle: SavedStateHandle,
     private val itemsRepository: ItemsRepository,
 ) : ViewModel() {
-
+    private val repo = SettingsRepo()
     private val itemId: Int = checkNotNull(savedStateHandle[ItemDetailsDestination.itemIdArg])
 
     /**
@@ -96,6 +97,14 @@ class ItemDetailsViewModel(
 
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
+    }
+
+    fun isNoData(): Boolean {
+        return repo.isNoData()
+    }
+
+    fun isNoShare(): Boolean {
+        return repo.isNoShare()
     }
 }
 

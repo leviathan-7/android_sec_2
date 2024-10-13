@@ -43,4 +43,5 @@
     <string name="email_req">E-mail*</string>
     <string name="telefon_req">Tel*</string>
     <string name="share">Share</string>
+    <string name="settings_title">Settings</string>
 </resources>

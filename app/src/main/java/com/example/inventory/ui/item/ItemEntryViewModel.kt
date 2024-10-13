@@ -22,13 +22,14 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.inventory.data.Item
 import com.example.inventory.data.ItemsRepository
+import com.example.inventory.data.SettingsRepo
 import java.text.NumberFormat
 
 /**
  * ViewModel to validate and insert items in the Room database.
  */
 class ItemEntryViewModel(private val itemsRepository: ItemsRepository) : ViewModel() {
-
+    private val repo = SettingsRepo()
     /**
      * Holds current item ui state
      */
@@ -58,6 +59,14 @@ class ItemEntryViewModel(private val itemsRepository: ItemsRepository) : ViewMod
             name.isNotBlank() && price.isNotBlank() && quantity.isNotBlank()
                     && personName.isNotBlank() && email.isNotBlank() && telefon.isNotBlank()
         }
+    }
+
+    fun isDefolt(): Boolean {
+        return repo.isDefolt()
+    }
+
+    fun defolt(): Int {
+        return repo.defolt()
     }
 }
 
