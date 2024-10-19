@@ -18,10 +18,11 @@ package com.example.inventory.ui.item
 
 import android.content.Context
 import android.content.Intent
-import androidx.core.content.ContextCompat.startActivity
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.inventory.data.EncryptedRepo
 import com.example.inventory.data.ItemsRepository
 import com.example.inventory.data.SettingsRepo
 import kotlinx.coroutines.flow.SharingStarted
@@ -30,6 +31,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+
 
 /**
  * ViewModel to retrieve, update and delete an item from the [ItemsRepository]'s data source.
@@ -81,7 +83,8 @@ class ItemDetailsViewModel(
                 "\nPrice: " + uiState.value.itemDetails.price +
                 "\nPerson Name: " + uiState.value.itemDetails.personName +
                 "\nE-mail: " + uiState.value.itemDetails.email +
-                "\nTel: " + uiState.value.itemDetails.telefon
+                "\nTel: " + uiState.value.itemDetails.telefon +
+                "\nCreation: " + uiState.value.itemDetails.creation
 
         val sendIntent: Intent = Intent().apply {
             action = Intent.ACTION_SEND
@@ -105,6 +108,11 @@ class ItemDetailsViewModel(
 
     fun isNoShare(): Boolean {
         return repo.isNoShare()
+    }
+
+    fun save(selectedUri: Uri) {
+        val encryptedRepo = EncryptedRepo(selectedUri)
+        encryptedRepo.WriteFile(uiState.value.itemDetails.toItem())
     }
 }
 

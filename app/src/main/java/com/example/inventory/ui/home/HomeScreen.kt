@@ -16,6 +16,11 @@
 
 package com.example.inventory.ui.home
 
+import android.net.Uri
+import android.util.Log
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -33,7 +38,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,8 +49,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -84,6 +93,20 @@ fun HomeScreen(
     val homeUiState by viewModel.homeUiState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { selectedUri ->
+        if (selectedUri != null) {
+            Log.d("selectedUri", ""+selectedUri)
+            viewModel.upload(selectedUri)
+        } else {
+            Log.d("selectedUri", "No file was selected")
+        }
+    }
+    var upload by rememberSaveable { mutableStateOf(false) }
+    if (upload){
+        Upload(launcher)
+        upload = false
+    }
+
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
@@ -97,20 +120,38 @@ fun HomeScreen(
 
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = navigateToItemEntry,
-                shape = MaterialTheme.shapes.medium,
-                modifier = Modifier
-                    .padding(
-                        end = WindowInsets.safeDrawing.asPaddingValues()
-                            .calculateEndPadding(LocalLayoutDirection.current)
+            Column {
+                FloatingActionButton(
+                    onClick = navigateToItemEntry,
+                    shape = MaterialTheme.shapes.medium,
+                    modifier = Modifier
+                        .padding(
+                            end = WindowInsets.safeDrawing.asPaddingValues()
+                                .calculateEndPadding(LocalLayoutDirection.current)
+                        )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = stringResource(R.string.item_entry_title)
                     )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = stringResource(R.string.item_entry_title)
-                )
+                }
+                Text(text = "")
+                FloatingActionButton(
+                    onClick = { upload = true },
+                    shape = MaterialTheme.shapes.medium,
+                    modifier = Modifier
+                        .padding(
+                            end = WindowInsets.safeDrawing.asPaddingValues()
+                                .calculateEndPadding(LocalLayoutDirection.current)
+                        )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ExitToApp,
+                        contentDescription = stringResource(R.string.upload_title)
+                    )
+                }
             }
+
         },
     ) { innerPadding ->
         HomeBody(
@@ -119,6 +160,13 @@ fun HomeScreen(
             modifier = modifier.fillMaxSize(),
             contentPadding = innerPadding,
         )
+    }
+}
+
+@Composable
+private fun Upload(launcher: ManagedActivityResultLauncher<String, Uri?>) {
+    LaunchedEffect(Unit) {
+        launcher.launch("text/plain")
     }
 }
 
@@ -208,7 +256,7 @@ private fun InventoryItem(
 fun HomeBodyPreview() {
     InventoryTheme {
         HomeBody(listOf(
-            Item(1, "Game", 100.0, 20, "Petrov", "petrov@mail.ru","+79555804433"), Item(2, "Pen", 200.0, 30, "Petrov", "petrov@mail.ru","+79555804433"), Item(3, "TV", 300.0, 50, "Petrov", "petrov@mail.ru","+79555804433")
+            Item(1, "Game", 100.0, 20, "Petrov", "petrov@mail.ru","+79555804433", "manual"), Item(2, "Pen", 200.0, 30, "Petrov", "petrov@mail.ru","+79555804433", "manual"), Item(3, "TV", 300.0, 50, "Petrov", "petrov@mail.ru","+79555804433", "manual")
         ), onItemClick = {})
     }
 }
@@ -226,7 +274,7 @@ fun HomeBodyEmptyListPreview() {
 fun InventoryItemPreview() {
     InventoryTheme {
         InventoryItem(
-            Item(1, "Game", 100.0, 20, "Petrov", "petrov@mail.ru","+79555804433"),
+            Item(1, "Game", 100.0, 20, "Petrov", "petrov@mail.ru","+79555804433", "manual"),
         )
     }
 }

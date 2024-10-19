@@ -16,6 +16,11 @@
 
 package com.example.inventory.ui.item
 
+import android.net.Uri
+import android.util.Log
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -45,6 +50,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,14 +63,12 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.inventory.InventoryTopAppBar
 import com.example.inventory.R
 import com.example.inventory.data.Item
 import com.example.inventory.ui.AppViewModelProvider
 import com.example.inventory.ui.navigation.NavigationDestination
-import com.example.inventory.ui.theme.InventoryTheme
 import kotlinx.coroutines.launch
 
 object ItemDetailsDestination : NavigationDestination {
@@ -85,6 +89,23 @@ fun ItemDetailsScreen(
     val uiState = viewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+
+
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/plain"))
+    { selectedUri ->
+        if (selectedUri != null) {
+            Log.d("selectedUri", ""+selectedUri)
+            viewModel.save(selectedUri)
+        } else {
+            Log.d("selectedUri", "No file was selected")
+        }
+    }
+    var write by rememberSaveable { mutableStateOf(false) }
+    if (write){
+        Write(launcher)
+        write = false
+    }
+
     Scaffold(
         topBar = {
             InventoryTopAppBar(
@@ -114,6 +135,7 @@ fun ItemDetailsScreen(
         ItemDetailsBody(
             itemDetailsUiState = uiState.value,
             onShare = {viewModel.share(context)},
+            onSave = {write = true },
             onSellItem = { viewModel.reduceQuantityByOne() },
             onDelete = {
                 // Note: If the user rotates the screen very fast, the operation may get cancelled
@@ -138,9 +160,17 @@ fun ItemDetailsScreen(
 }
 
 @Composable
+private fun Write(launcher: ManagedActivityResultLauncher<String, Uri?>) {
+    LaunchedEffect(Unit) {
+        launcher.launch("Item.txt")
+    }
+}
+
+@Composable
 private fun ItemDetailsBody(
     itemDetailsUiState: ItemDetailsUiState,
     onShare: () -> Unit,
+    onSave: () -> Unit,
     onSellItem: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
@@ -163,6 +193,13 @@ private fun ItemDetailsBody(
             enabled = !viewModel.isNoShare()
         ) {
             Text(stringResource(R.string.share))
+        }
+        Button(
+            onClick = onSave,
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.small
+        ) {
+            Text(stringResource(R.string.save))
         }
         Button(
             onClick = onSellItem,
@@ -265,6 +302,17 @@ fun ItemDetails(
             ItemDetailsRow(
                 labelResID = R.string.telefon,
                 itemDetail = item.telefon,
+                modifier = Modifier.padding(
+                    horizontal = dimensionResource(
+                        id = R.dimen
+                            .padding_medium
+                    )
+                )
+            )
+
+            ItemDetailsRow(
+                labelResID = R.string.creation,
+                itemDetail = item.creation,
                 modifier = Modifier.padding(
                     horizontal = dimensionResource(
                         id = R.dimen

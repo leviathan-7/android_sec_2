@@ -23,6 +23,7 @@ import androidx.lifecycle.ViewModel
 import com.example.inventory.data.Item
 import com.example.inventory.data.ItemsRepository
 import com.example.inventory.data.SettingsRepo
+import kotlinx.serialization.Serializable
 import java.text.NumberFormat
 
 /**
@@ -50,7 +51,9 @@ class ItemEntryViewModel(private val itemsRepository: ItemsRepository) : ViewMod
      */
     suspend fun saveItem() {
         if (validateInput()) {
-            itemsRepository.insertItem(itemUiState.itemDetails.toItem())
+            val item = itemUiState.itemDetails.toItem()
+            item.creation = "manual"
+            itemsRepository.insertItem(item)
         }
     }
 
@@ -86,7 +89,9 @@ data class ItemDetails(
 
     val personName: String = "",
     val email: String = "",
-    val telefon: String = ""
+    val telefon: String = "",
+
+    val creation: String = ""
 )
 
 /**
@@ -112,7 +117,9 @@ fun ItemDetails.toItem(): Item {
 
         personName = personName,
         email = e,
-        telefon = tel
+        telefon = tel,
+
+        creation = creation
     )
 }
 
@@ -139,5 +146,7 @@ fun Item.toItemDetails(): ItemDetails = ItemDetails(
 
     personName = personName,
     email = email,
-    telefon = telefon
+    telefon = telefon,
+
+    creation = creation
 )

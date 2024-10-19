@@ -44,4 +44,8 @@
     <string name="telefon_req">Tel*</string>
     <string name="share">Share</string>
     <string name="settings_title">Settings</string>
+    <string name="creation">Creation</string>
+    <string name="save">Save</string>
+    <string name="upload_title">Upload Item</string>
+
 </resources>
