@@ -96,4 +96,8 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
+
+    implementation("com.commonsware.cwac:saferoom.x:1.2.1")
+    implementation("net.zetetic:android-database-sqlcipher:4.5.3")
+    implementation("androidx.sqlite:sqlite:2.1.0")
 }
